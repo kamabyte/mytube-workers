@@ -1,0 +1,32 @@
+[project]
+name = "workers"
+version = "0.1.0"
+description = "Python workers for MyTube app"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pymysql>=1.1.1",
+    "psycopg[binary]>=3.2.9",
+    "python-dotenv>=1.1.1",
+    "sqlalchemy>=2.0.41",
+    "yt-dlp[default]>=2025.1.15",
+]
+
+[project.scripts]
+video-downloader = "video_downloader.entrypoints.cli:main"
+workers = "video_downloader.entrypoints.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src"]
+
+[tool.hatch.build.targets.wheel.sources]
+src = ""

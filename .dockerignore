@@ -1,0 +1,14 @@
+# Секреты и локальное окружение в образ не попадают.
+.env
+.env.*
+cookies.txt
+.venv
+**/__pycache__
+*.py[cod]
+.pytest_cache
+.idea
+.git
+.github
+dist
+tests
+scripts
