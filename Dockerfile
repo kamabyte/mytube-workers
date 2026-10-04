@@ -45,4 +45,6 @@ USER mytube
 # Воркер крутит цикл «взять задания → скачать → подождать interval».
 # Остановка по SIGTERM прерывает текущую загрузку; незавершённое
 # докачается в следующем цикле (is_downloaded ставится только в конце).
-CMD ["video-downloader", "worker", "--env-file", "/app/container.env", "--interval", "300"]
+# 15 секунд: видео, которое попросили скачать из веба, должно уходить
+# в работу сразу; пустой опрос очереди — один дешёвый запрос к SQLite.
+CMD ["video-downloader", "worker", "--env-file", "/app/container.env", "--interval", "15"]

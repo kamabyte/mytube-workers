@@ -75,8 +75,8 @@ class StubProcessor:
 
 def run_once(processor, recorder, sink: StubSink | None = None) -> StubSink:
     class Source:
-        def fetch_pending(self, limit: int) -> list[DownloadJob]:
-            return [JOB]
+        def fetch_pending(self, limit: int, exclude=()) -> list[DownloadJob]:
+            return [] if JOB.id in exclude else [JOB]
 
     sink = sink or StubSink()
     ProcessJobs(
