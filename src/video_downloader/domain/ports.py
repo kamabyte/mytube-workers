@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Collection
 from typing import Protocol
 
 from .models import DownloadJob, DownloadResult
 
 
 class JobSource(Protocol):
-    def fetch_pending(self, limit: int) -> list[DownloadJob]: ...
+    def fetch_pending(self, limit: int, exclude: Collection[int] = ()) -> list[DownloadJob]: ...
 
 
 class ResultSink(Protocol):

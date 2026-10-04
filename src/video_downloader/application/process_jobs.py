@@ -38,20 +38,30 @@ class ProcessJobs:
         self._dry_run = dry_run
 
     def run_once(self) -> int:
-        jobs = self._source.fetch_pending(self._batch_size)
-
-        if not jobs:
-            LOGGER.info("No pending videos found.")
-            return 0
-
+        # Задания берём по одному, а не пачкой: видео, которое попросили
+        # посреди прохода, встаёт следующим, а не ждёт, пока скачается вся пачка.
+        # Уже взятые в этом проходе исключаем — упавшее видео остаётся в очереди
+        # и иначе вернулось бы снова.
+        attempted: list[int] = []
         processed = 0
-        for job in jobs:
+
+        while len(attempted) < self._batch_size:
+            jobs = self._source.fetch_pending(1, exclude=attempted)
+            if not jobs:
+                break
+
+            job = jobs[0]
+            attempted.append(job.id)
+
             if self._dry_run:
                 LOGGER.info("Dry run video id=%s external_id=%s name=%s", job.id, job.external_id, job.name)
                 processed += 1
                 continue
 
             processed += self._process_job(job)
+
+        if not attempted:
+            LOGGER.info("No pending videos found.")
 
         return processed
 
