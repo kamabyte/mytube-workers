@@ -41,3 +41,7 @@ class RunRecorder(Protocol):
         result: DownloadResult | None = None,
         error: Exception | None = None,
     ) -> None: ...
+
+
+class DownloadNotifier(Protocol):
+    def downloaded(self, job: DownloadJob) -> None: ...
