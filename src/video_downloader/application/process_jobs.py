@@ -6,7 +6,7 @@ import time
 from yt_dlp.utils import DownloadError
 
 from video_downloader.domain.models import DownloadJob
-from video_downloader.domain.ports import JobProcessor, JobSource, ResultSink, RunRecorder
+from video_downloader.domain.ports import DownloadNotifier, JobProcessor, JobSource, ResultSink, RunRecorder
 from video_downloader.downloader import (
     MediaValidationError,
     is_authentication_required_error,
@@ -28,6 +28,7 @@ class ProcessJobs:
         poll_interval: int,
         batch_size: int,
         dry_run: bool,
+        notifier: DownloadNotifier | None = None,
     ) -> None:
         self._source = source
         self._sink = sink
@@ -36,6 +37,7 @@ class ProcessJobs:
         self._poll_interval = poll_interval
         self._batch_size = batch_size
         self._dry_run = dry_run
+        self._notifier = notifier
 
     def run_once(self) -> int:
         jobs = self._source.fetch_pending(self._batch_size)
@@ -83,6 +85,9 @@ class ProcessJobs:
                     result.download_seconds or 0.0,
                     result.transcode_seconds or 0.0,
                 )
+                # После коммита в базу: api читает видео уже скачанным.
+                if self._notifier is not None:
+                    self._notifier.downloaded(job)
                 return 1
 
             LOGGER.warning("Video was downloaded but not updated. id=%s", job.id)

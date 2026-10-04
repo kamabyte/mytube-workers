@@ -25,6 +25,9 @@ class AppConfig:
     yt_dlp_cookies_from_browser: tuple[str, ...] | None
     yt_dlp_node_path: Path | None
     subtitle_langs: tuple[str, ...]
+    # Хук «видео скачалось» в mytube-api: шаблон адреса с {id} и токен.
+    notify_url: str | None = None
+    notify_token: str | None = None
 
 
 def load_config(
@@ -92,6 +95,8 @@ def load_config(
             env.get("VIDEO_DOWNLOADER_SUBTITLE_LANGS"),
             default=("en", "ru"),
         ),
+        notify_url=str(env.get("VIDEO_DOWNLOADER_NOTIFY_URL") or "").strip() or None,
+        notify_token=str(env.get("VIDEO_DOWNLOADER_NOTIFY_TOKEN") or "").strip() or None,
     )
 
 

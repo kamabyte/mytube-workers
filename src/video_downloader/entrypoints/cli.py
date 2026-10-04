@@ -9,6 +9,7 @@ import zlib
 from video_downloader.application.process_jobs import ProcessJobs
 from video_downloader.config import load_config
 from video_downloader.domain.models import DownloadJob
+from video_downloader.infrastructure.notifiers.http_notifier import HttpDownloadNotifier, NullDownloadNotifier
 from video_downloader.infrastructure.persistence.db import create_db_engine
 from video_downloader.infrastructure.processors.yt_dlp_processor import YtDlpProcessor
 from video_downloader.infrastructure.recorders.db_recorder import DbRunRecorder, NullRunRecorder
@@ -67,10 +68,19 @@ def build_service(args: argparse.Namespace, config) -> ProcessJobs:
         sink=DbResultSink(engine),
         processor=processor,
         recorder=NullRunRecorder() if args.dry_run else DbRunRecorder(engine),
+        notifier=build_notifier(config, dry_run=args.dry_run),
         poll_interval=config.poll_interval,
         batch_size=config.batch_size,
         dry_run=args.dry_run,
     )
+
+
+def build_notifier(config, *, dry_run: bool):
+    """Хук в api — только если заданы и адрес, и токен; без них уведомлений просто нет."""
+    if dry_run or not config.notify_url or not config.notify_token:
+        return NullDownloadNotifier()
+
+    return HttpDownloadNotifier(config.notify_url, config.notify_token)
 
 
 def run_test_url(args: argparse.Namespace, config) -> None:
